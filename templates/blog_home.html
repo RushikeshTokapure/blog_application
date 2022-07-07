@@ -1,0 +1,65 @@
+{% extends 'template.html' %}
+
+{% load static %}
+
+{% block title %}BlogHome{% endblock title %}
+
+{% block body %}
+
+{% for i in posts %}
+
+<section class="blog_list_area my-5" style="background-color: #FFFFFF; margin: 5% 5% 5% 5%; padding: 2% 2%; box-shadow: 4px 3px 8px 1px #969696;">
+    <div class="container m1020x">
+        <div>
+            <div class="row justify-content-center">
+                <div class="col-md-12">
+                    <article class="blog_list_item row m0">
+                        <div class="col-md-5">
+                            <a href="/blog/{{i.slug}}">
+                                <div class="blog_list_img" style="box-shadow: 4px 3px 8px 1px #969696;">
+                                    <img src="/media/{{i.image}}" alt="image" width="100%">
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-md-7">
+                            <div class="blog_list_content">
+                                <a href="/blog/{{i.slug}}" style="color:black; text-decoration:none;">
+                                    <h3>{{i.title}}</h3>
+                                </a>
+                                <div class="pull-left">
+                                    <p>
+                                    <div class="preview">
+                                        {{i.content |safe| truncatechars:200}}
+                                    </div>
+                                    </p>
+                                </div>
+                                <div class="pull-left">
+                                    <button class="btn" style="background-color: red;box-shadow: 4px 3px 8px 1px #969696;">
+                                        <a class="read_more" href="/blog/{{i.slug}}" style="color:white;">
+                                            READ MORE
+                                        </a>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endfor %}
+
+{% block js %}
+
+<script type="text/javascript">
+    let previews = document.getElementsByClassName("preview");
+    Array.from(previews).forEach((element) => {
+        element.innerHTML = element.innerText;
+    })
+</script>
+
+{% endblock js %}
+
+{% endblock body %}

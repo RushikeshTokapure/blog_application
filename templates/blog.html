@@ -1,0 +1,151 @@
+{% extends 'template.html' %}
+
+{% block title %} Blog {% endblock title %}
+
+{% block body %}
+
+{% load humanize %}
+
+{% load filters %}
+
+
+<section class="blog_list_area my-5">
+    <div class="container m1020x" style="background-color: aliceblue; padding: 2% 2%; box-shadow: 4px 3px 8px 1px #969696;">
+        <img src="/media/{{post.image}}" alt="image" width="70%" style="box-shadow: 4px 3px 8px 1px #969696;">
+        <h2 class="my-4">{{post.title}}</h2><br>
+        <p>{{post.content|safe}}</p>
+    </div>
+</section>
+
+
+<section>
+    <div class="container mb-5"
+        style="background-color: aliceblue; padding: 2% 2%; box-shadow: 4px 3px 8px 1px #969696;">
+
+        <div class="row">
+            <div class="col-md-6" style="margin: 0px 20px 0px 25px; border: 1px solid #E0E0E0; padding: 2% 2%; width: 525px">
+                <form method="post" action="/blog/post_comment">
+
+                    {% csrf_token %}
+
+                    <h4>Leave a comment</h4><br>
+                    <input type="hidden" name="post_id" value="{{post.id}}">
+                    <input type="hidden" name="parent_id" value="">
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" name="name" id="name" class="form-control" placeholder="At least First and Last Name" required><br>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" name="email" id="email" class="form-control" placeholder="Valid Email Address" required><br>
+                    </div>
+                    <div class="form-group">
+                        <label for="comment">Comment</label>
+                        <textarea name="comment" id="comment" cols="30" rows="5" class="form-control" placeholder="Comment" required></textarea><br>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn text-white" style="background-color: red; box-shadow: 4px 3px 8px 1px #969696;">
+                            Post Comment
+                        </button>
+                    </div>
+                </form>
+                <br>
+
+            </div>
+            <div class="col-md-12 mb-6" style="overflow-x: hidden; overflow-y: auto; width: 525px; height: 525px; border: 1px solid #E0E0E0; padding: 2% 2%;">
+                <h4>{{comments.count}} Comments</h4><br>
+
+                {% for comment in comments %}
+
+                {% if comment.is_show is True %}
+
+                <div class="col-md-6" style="margin-bottom: 20px;">
+                    <div style="text-align: left; width:400px;">
+
+                        <strong style="font-size:20px;">{{comment.name}}</strong>
+                        - {{comment.email}}<br>
+                        <span style="font-size:12px">({{comment.created_on | naturaltime}})</span>
+                        <p>{{comment.comment}}</p>
+
+                        {% if user.is_authenticated %}
+                        <button class="btn btn-sm" style="margin:0px 10px 0px 50px; background-color: red; box-shadow: 4px 3px 8px 1px #969696; color:white" type="button" data-bs-toggle="collapse" data-bs-target="#reply{{comment.id}}" aria-expanded="false" aria-controls="reply{{comment.id}}">
+                            Reply
+                        </button>
+                        {% else %}
+                        <button class="btn btn-sm disabled" type="button" style="margin:0px 10px 0px 50px; background-color: red; box-shadow: 4px 3px 8px 1px #969696; color:white">
+                            Login to Reply
+                        </button>
+                        {% endif %}
+
+                        <button class="btn btn-sm dropdown-toggle" style="background-color: red; box-shadow: 4px 3px 8px 1px #969696; color:white" type="button" data-bs-toggle="collapse" data-bs-target="#replies{{comment.id}}" aria-expanded="false" aria-controls="replies{{comment.id}}">
+                            View Reply
+                        </button>
+                        <hr>
+                    </div>
+
+                    <div class="collapse my-2" id="reply{{comment.id}}" style="width: 400px;">
+
+                        <form method="post" action="/blog/post_comment">
+
+                            {% csrf_token %}
+
+                            <div class="form-group">
+                                <div class="form-group">
+                                    <label for="name">Name</label>
+                                    <input type="text" name="reply_name" id="reply_name" class="form-control" placeholder="At least First and Last Name" required><br>
+                                </div>
+                                <div class="form-group">
+                                    <label for="email">Email</label>
+                                    <input type="email" name="reply_email" id="reply_email" class="form-control" placeholder="Email Address if any"><br>
+                                </div>
+                                <div class="form-group">
+                                    <label for="reply">Reply</label>
+                                    <input type="text" name="comment" id="reply" style="width: 400px;" placeholder="Reply">
+                                </div>
+                                <input type="hidden" name="parent_id" value="{{comment.id}}">
+                                <input type="hidden" name="post_id" value="{{post.id}}">
+                                <div class="form-group">
+                                    <button type="submit" class="btn text-white my-2" style="background-color: red; box-shadow: 4px 3px 8px 1px #969696;">
+                                        Reply
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+
+                    </div>
+
+                    <div class="collapse" id="replies{{comment.id}}">
+
+                        {% for reply in reply_dict|get_dict:comment.id %}
+
+                        <div class="container my-2" style="margin: 0px 0px 0px 50px">
+                            <strong style="font-size:20px;">{{reply.name}}</strong> - {{reply.email}}<br>
+                            <span style="font-size:10px">({{reply.created_on | naturaltime}})</span><br>
+                            {{reply.comment}}<br>
+                        </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+                {% endif %}
+
+                {% endfor %}
+
+            </div>
+
+            {% for message in messages %}
+            <div class="alert alert-{{message.tags}} alert-dismissible fade show my-2" role="alert">
+                <strong>Status: </strong>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                {{message}}
+            </div>
+            {% endfor %}
+
+        </div>
+    </div>
+</section>
+
+{% endblock body %}
